@@ -1,0 +1,25 @@
+{
+  "name": "map-poll",
+  "version": "1.0.0",
+  "description": "Polls for data that can be visualised on a map",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kephail/Map-Poll.git"
+  },
+  "author": "Ben Harris, Thom Henderson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kephail/Map-Poll/issues"
+  },
+  "homepage": "https://github.com/kephail/Map-Poll#readme",
+  "dependencies": {
+    "express": "^4.13.3"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.0"
+  }
+}
