@@ -2,7 +2,7 @@
   "name": "map-poll",
   "version": "1.0.0",
   "description": "Polls for data that can be visualised on a map",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {},
   "repository": {
     "type": "git",
@@ -15,6 +15,7 @@
   },
   "homepage": "https://github.com/kephail/Map-Poll#readme",
   "dependencies": {
+    "babel-core": "^6.2.1",
     "babelify": "^7.2.0",
     "browserify": "^12.0.1",
     "ejs": "^2.3.4",
@@ -26,6 +27,7 @@
     "react-dom": "^0.14.3"
   },
   "devDependencies": {
+    "babel-preset-react": "^6.1.18",
     "gulp": "^3.9.0"
   }
 }
