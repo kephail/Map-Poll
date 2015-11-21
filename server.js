@@ -2,6 +2,7 @@ var express             = require('express'),
     React               = require('react'),
     ReactDOM            = require('react-dom'),
     mongoose            = require('mongoose'),
+    bodyParser          = require('body-parser'),
     Schema              = mongoose.Schema,
     Question            = require('./app/schemas/question.js'),
     Answer              = require('./app/schemas/answer.js'),
@@ -19,12 +20,13 @@ app.set('views', __dirname + '/public/views');
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
 app.use(express.static(__dirname + '/public'));
+app.use(bodyParser());
 
 
 
 // Application ------------------------------------------------------
 // Set up Routes for the application
-require('./app/routes/routes.js')(app);
+require('./app/routes/routes.js')(app, Answer, Question);
 
 
 
