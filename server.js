@@ -4,16 +4,12 @@ var express             = require('express'),
     mongoose            = require('mongoose'),
     bodyParser          = require('body-parser'),
     Schema              = mongoose.Schema,
-    Question            = require('./app/schemas/question.js'),
-    Answer              = require('./app/schemas/answer.js'),
+    Question            = require('./app/schemas/question.js')(mongoose, Schema),
+    Answer              = require('./app/schemas/answer.js')(mongoose, Schema),
     app                 = express(),
     port                = 3000;
 
 mongoose.connect('mongodb://admin:map-poll1@ds047474.mongolab.com:47474/map-poll');
-
-Question.find({name: "First Question"}, function (err, res) {
-  console.log(res);
-});
 
 
 app.set('views', __dirname + '/public/views');
@@ -21,7 +17,6 @@ app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser());
-
 
 
 // Application ------------------------------------------------------
