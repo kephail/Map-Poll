@@ -7,14 +7,16 @@ module.exports = function (mongoose, Schema) {
     currentLongitude:     {type : Number},
     currentLatitude:      {type : Number},
     currentCountry:       {type : String, 'default' : '', trim : true},
-    currentCountryShort:  {type : String, 'default' : '', trim : true},
+    currentCountryLong:   {type : Number},
+    currentCountryLat:    {type : Number},
     selectedLongitude:    {type : Number},
     selectedLatitude:     {type : Number},
     selectedCountry:      {type : String, 'default' : '', trim : true},
-    selectedCountryShort: {type : String, 'default' : '', trim : true},
+    selectedCountryLong:  {type : Number},
+    selectedCountryLat:   {type : Number},
     dateAnswered:         {type : Date, 'default' : Date.now},
   });
 
   return mongoose.model('Answer', AnswerSchema);
-  
+
 }

@@ -29,7 +29,7 @@ module.exports = function (app, Answer, Question) {
   });
 
   app.get('/api/getAnswers', function (req, res) {
-    Answer.find({questionId: req.body.questionId}, function (err, answers) {
+    Answer.find({}, function (err, answers) {
       if (err) {
         res.status(500);
         res.send(err);
