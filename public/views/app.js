@@ -1,4 +1,5 @@
 var gatheredData = {};
+var hasClicked = false;
 function init () {
   gatheredData = {
     currentLongitude:     0,
@@ -62,12 +63,15 @@ var Map = React.createClass({
         gatheredData.selectedCountry       = res.formatted_address;
         gatheredData.selectedCountryLong   = res.geometry.location.lng;
         gatheredData.selectedCountryLat    = res.geometry.location.lat;
-        addAnswer(gatheredData, function (err, res) {
-          console.log("Answer stored");
-          if (!err) {
-            drawLines(res, that.map);
-          }
-        });
+        if (!hasClicked) {
+          addAnswer(gatheredData, function (err, res) {
+            hasClicked = true;
+            console.log("Answer stored");
+            if (!err) {
+              drawLines(res, that.map);
+            }
+          });
+        }
       }
 
     });
@@ -105,7 +109,6 @@ function drawLines (gatheredData, map){
 }
 
 function drawLine (answer, map) {
-  console.log("line: ", answer);
   var point1 = L.latLng(answer.currentCountryLat, answer.currentCountryLong);
   var point2 = L.latLng(answer.selectedCountryLat, answer.selectedCountryLong);
   var line_points = [point1, point2];
