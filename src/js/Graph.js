@@ -1,4 +1,4 @@
-var Graph = React.createClass({
+const Graph = React.createClass({
 
   getInitialState: function () {
     return {
@@ -52,12 +52,10 @@ var Graph = React.createClass({
           }
 
           if (i === answers.length - 1) {
-            setTimeout(() => {
-              that.setState({
-                loaded: true,
-                data
-              });
-            }, 5000);
+            that.setState({
+              loaded: true,
+              data
+            });
           }
 
         }
@@ -175,8 +173,3 @@ var Graph = React.createClass({
     );
   }
 });
-
-ReactDOM.render(
-  React.createElement(Graph, null),
-  document.getElementById('graphs')
-);
