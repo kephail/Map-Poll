@@ -27,7 +27,7 @@ function init () {
   });
 }
 
-var Map = React.createClass({
+const Map = React.createClass({
   getInitialState: function () {
     return {map: null};
   },
@@ -77,9 +77,9 @@ var Map = React.createClass({
     });
   },
   render: function() {
-      return (
-          <div className='map'></div>
-      );
+    return (
+      <div className='map'></div>
+    );
   }
 });
 
@@ -167,10 +167,5 @@ function getCountry(long, lat, callback){
     }
   });
 }
-
-ReactDOM.render(
-  React.createElement(Map, null),
-  document.getElementById('content')
-);
 
 init();

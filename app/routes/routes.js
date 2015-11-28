@@ -29,7 +29,11 @@ module.exports = function (app, Answer, Question) {
   });
 
   app.get('/api/getAnswers', function (req, res) {
-    Answer.find({}, function (err, answers) {
+    var query = {};
+    if(req.body){
+      query = req.body.query;
+    }
+    Answer.find(query, function (err, answers) {
       if (err) {
         res.status(500);
         res.send(err);
@@ -52,8 +56,8 @@ module.exports = function (app, Answer, Question) {
     });
   });
 
-  app.get('/api/getQuestion/:id', function (req, res) {
-    Question.find({_id: req.params.id}, function (err, question) {
+  app.get('/api/getQuestion/:skip', function (req, res) {
+    Question.find({}, {}, {limit: 1, skip: req.params.skip}, function (err, question) {
       if (err) {
         res.status(500);
         res.send(err);
@@ -63,5 +67,6 @@ module.exports = function (app, Answer, Question) {
       }
     });
   });
+
 
 };
