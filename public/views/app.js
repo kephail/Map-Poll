@@ -77,9 +77,9 @@ var Map = React.createClass({
     });
   },
   render: function() {
-      return (
-          <div className='map'></div>
-      );
+    return (
+      <div className='map'></div>
+    );
   }
 });
 
