@@ -17,7 +17,7 @@ const Graph = React.createClass({
     let { data } = this.state;
 
     this.setState({ loading: true });
-
+    
     $.ajax({
       url: "/api/getAnswers",
       type: "GET",

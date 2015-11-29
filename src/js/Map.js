@@ -1,35 +1,44 @@
-var gatheredData = {};
-var hasClicked = false;
-function init () {
-  gatheredData = {
-    currentLongitude:     0,
-    currentLatitude:      0,
-    currentCountry:       "",
-    currentCountryShort:  "",
-    selectedLongitude:    0,
-    selectedLatitude:     0,
-    selectedCountry:      "",
-    selectedCountryShort: ""
-  }
-  navigator.geolocation.getCurrentPosition(function(position) {
-    getCountry(position.coords.longitude, position.coords.latitude, function (err, res) {
-      if (err) {
-        console.log(err);
-      }
-      else {
-        gatheredData.currentLatitude       = position.coords.latitude;
-        gatheredData.currentLongitude      = position.coords.longitude;
-        gatheredData.currentCountry        = res.formatted_address;
-        gatheredData.currentCountryLong    = res.geometry.location.lng;
-        gatheredData.currentCountryLat     = res.geometry.location.lat;
-      }
-    });
-  });
-}
 
 const Map = React.createClass({
   getInitialState: function () {
-    return {map: null};
+    return {
+      map: null,
+      loaded: false,
+      error: '',
+      hasClicked: false,
+      gatheredData: {
+        currentLongitude:     0,
+        currentLatitude:      0,
+        currentCountry:       "",
+        currentCountryShort:  "",
+        selectedLongitude:    0,
+        selectedLatitude:     0,
+        selectedCountry:      "",
+        selectedCountryShort: ""
+      }
+    };
+  },
+  componentWillMount: function () {
+    navigator.geolocation.getCurrentPosition( (position) => {
+      this.getCountry(position.coords.longitude, position.coords.latitude, (err, res) => {
+        if (err) {
+          console.log(err);
+        }
+        else {
+          this.setState({
+            gatheredData: {
+              ...this.state.gatheredData,
+              currentLatitude: position.coords.latitude,
+              currentLongitude: position.coords.longitude,
+              currentCountry: res.formatted_address,
+              currentCountryLong: res.geometry.location.lng,
+              currentCountryLat: res.geometry.location.lat
+            }
+          });
+          this.setState({ loaded: true })
+        }
+      });
+    });
   },
   componentDidMount: function () {
     var map = this.map = L.map(ReactDOM.findDOMNode(this), {
@@ -52,23 +61,28 @@ const Map = React.createClass({
     this.map = null;
   },
   onMapClick: function (e) {
-    var that = this;
-    getCountry(e.latlng.lng, e.latlng.lat, function (err, res) {
+    this.getCountry(e.latlng.lng, e.latlng.lat, (err, res) => {
       if (err) {
         console.log(err);
       }
       else {
-        gatheredData.selectedLongitude     = e.latlng.lng;
-        gatheredData.selectedLatitude      = e.latlng.lat;
-        gatheredData.selectedCountry       = res.formatted_address;
-        gatheredData.selectedCountryLong   = res.geometry.location.lng;
-        gatheredData.selectedCountryLat    = res.geometry.location.lat;
-        if (!hasClicked) {
-          addAnswer(gatheredData, function (err, res) {
-            hasClicked = true;
-            console.log("Answer stored");
+        this.setState({
+          gatheredData: {
+            ...this.state.gatheredData,
+            selectedLongitude: e.latlng.lng,
+            selectedLatitude: e.latlng.lat,
+            selectedCountry: res.formatted_address,
+            selectedCountryLong: res.geometry.location.lng,
+            selectedCountryLat: res.geometry.location.lat
+          }
+        });
+
+        if (!this.state.hasClicked && this.state.loaded === true) {
+          this.addAnswer((err, res) => {
+            this.setState({hasClicked: true})
+            console.log("Answer stored", res);
             if (!err) {
-              drawLines(res, that.map);
+              this.drawLines();
             }
           });
         }
@@ -76,96 +90,70 @@ const Map = React.createClass({
 
     });
   },
+  getCountry: function (long, lat, callback){
+    $.ajax({
+      url: "http://maps.googleapis.com/maps/api/geocode/json?latlng="+ lat + "," + long + "&sensor=true",
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        var components = data.results[data.results.length-1];
+
+        return callback(null, components);
+      },
+      error: function(xhr, status, err) {
+        return callback(err.toString(), null);
+      }
+    });
+  },
+  addAnswer: function (callback) {
+    $.ajax({
+      url: "/api/addAnswer",
+      type: "POST",
+      dataType: 'json',
+      data: this.state.gatheredData,
+      cache: false,
+      success: function (data) {
+        return callback(null, data);
+      },
+      error: function (xhr, status, err) {
+        return callback(err.toString(), null);
+      }
+    });
+  },
+  drawLines: function (){
+    const that = this;
+    this.drawLine(this.state.gatheredData);
+
+    $.ajax({
+      url: "/api/getAnswers",
+      type: "GET",
+      dataType: 'json',
+      cache: false,
+      success: function (data) {
+        for (var i = 0; i < data.length; i++) {
+          that.drawLine(data[i]);
+        }
+      },
+      error: function (xhr, status, err) {
+      }
+    });
+
+  },
+  drawLine (answer) {
+    var point1 = L.latLng(answer.currentCountryLat, answer.currentCountryLong);
+    var point2 = L.latLng(answer.selectedCountryLat, answer.selectedCountryLong);
+    var line_points = [point1, point2];
+
+    var polyline_options = {
+        color: '#000',
+        weight: 2,
+        opacity: .2
+    }
+    var polyline = L.polyline(line_points, polyline_options).addTo(this.map);
+  },
   render: function() {
     return (
       <div className='map'></div>
     );
   }
 });
-
-function drawLines (gatheredData, map){
-  var current = {
-      fromLat: gatheredData.currentCountryLat,
-      fromLong: gatheredData.currentCountryLong,
-      toLat: gatheredData.selectedCountryLat,
-      toLong: gatheredData.selectedCountryLong
-    }
-  drawLine(gatheredData, map);
-
-  $.ajax({
-    url: "/api/getAnswers",
-    type: "GET",
-    dataType: 'json',
-    cache: false,
-    success: function (data) {
-      for (var i = 0; i < data.length; i++) {
-        drawLine(data[i], map);
-      }
-    },
-    error: function (xhr, status, err) {
-    }
-  });
-
-}
-
-function drawLine (answer, map) {
-  var point1 = L.latLng(answer.currentCountryLat, answer.currentCountryLong);
-  var point2 = L.latLng(answer.selectedCountryLat, answer.selectedCountryLong);
-  var line_points = [point1, point2];
-
-  // Define polyline options
-  // http://leafletjs.com/reference.html#polyline
-  var polyline_options = {
-      color: '#000',
-      weight: 2,
-      opacity: .2
-  };
-
-  // Defining a polygon here instead of a polyline will connect the
-  // endpoints and fill the path.
-  // http://leafletjs.com/reference.html#polygon
-  var polyline = L.polyline(line_points, polyline_options).addTo(map);
-}
-
-function addAnswer (data, callback) {
-  $.ajax({
-    url: "/api/addAnswer",
-    type: "POST",
-    dataType: 'json',
-    data: data,
-    cache: false,
-    success: function (data) {
-      return callback(null, data);
-    },
-    error: function (xhr, status, err) {
-      return callback(err.toString(), null);
-    }
-  });
-}
-
-function getCountry(long, lat, callback){
-  $.ajax({
-    url: "http://maps.googleapis.com/maps/api/geocode/json?latlng="+ lat + "," + long + "&sensor=true",
-    dataType: 'json',
-    cache: false,
-    success: function(data) {
-      var components = data.results[data.results.length-1];
-        // .map(function (result) {
-        //   return result.address_components;
-        // })
-        // .reduce(function (a, b) {
-        //   return a.concat(b);
-        // }, [])
-        // .filter(function (component) {
-        //   return component.types.indexOf('country') !== -1;
-        // })[0];
-
-      return callback(null, components);
-    },
-    error: function(xhr, status, err) {
-      return callback(err.toString(), null);
-    }
-  });
-}
-
-init();
