@@ -1,11 +1,25 @@
+*::before, *, *::after{
+  margin: 0; padding: 0;
+  box-sizing: border-box;
+}
+
 .leaflet-container{
   height:500px;
 }
-.graph div {
+/*.graph div {
   font: 10px sans-serif;
   background-color: steelblue;
   text-align: right;
   padding: 3px;
   margin: 1px;
   color: white;
+}*/
+.graph div {
+  font: 10px sans-serif;
+  text-align: right;
+  padding: 5px;
+  display: inline-block;
+  border-right-color: black;
+  color: white;
+  font-size: 10px;
 }

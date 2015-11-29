@@ -9,6 +9,7 @@ const Graph = React.createClass({
   },
 
   componentDidUpdate: function () {
+    this.makeBar();
     this.makeGraph();
   },
 
@@ -17,7 +18,7 @@ const Graph = React.createClass({
     let { data } = this.state;
 
     this.setState({ loading: true });
-    
+
     $.ajax({
       url: "/api/getAnswers",
       type: "GET",
@@ -79,9 +80,11 @@ const Graph = React.createClass({
     var canvasWidth = 300, //width
         canvasHeight = 300,   //height
         outerRadius = Math.min(canvasWidth, canvasHeight) / 2,   //radius
-        color = d3.scale.category20(); //builtin range of colors
+        color = d3.scale.ordinal()
+        .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
 
-    var vis = d3.select("body")
+
+    var vis = d3.select(".graph")
       .append("svg:svg") //create the SVG element inside the <body>
         .data([data]) //associate our data with the document
         .attr("width", canvasWidth) //set the width of the canvas
@@ -150,6 +153,30 @@ const Graph = React.createClass({
       return a > 90 ? a - 180 : a;
     }
 
+  },
+
+  makeBar: function () {
+    const { data } = this.state;
+    let dataTotal = 0;
+    const minCount = 3
+    for (let i in data) {
+      if (data[i].count >= minCount) {
+        dataTotal += data[i].count;
+      }
+    }
+
+    let color = d3.scale.ordinal()
+    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+
+    var vis = d3.select(".graph")
+      .selectAll("div")
+        .data(data.filter(function(d) { return d.count >= minCount  }))
+      .enter().append("div")
+        .style("width", function(d) { return (d.count / dataTotal) * 100 + "%"; })
+        .style("height", "50px")
+        .style("background-color", function(d, i) { return color(i); })
+        .text(function(d) { return d.countryName + ": " + d.count });
   },
 
   render: function() {

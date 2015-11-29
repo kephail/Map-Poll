@@ -44,6 +44,7 @@ const Map = React.createClass({
     var map = this.map = L.map(ReactDOM.findDOMNode(this), {
       minZoom: 2,
       maxZoom: 2,
+      zoomControl: false,
       layers: [
         L.tileLayer(
           'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -51,6 +52,8 @@ const Map = React.createClass({
       ],
       attributionControl: false,
     });
+    map.scrollWheelZoom.disable();
+    map.touchZoom.disable();
     this.setState({map: this.map});
 
     map.on('click', this.onMapClick);
