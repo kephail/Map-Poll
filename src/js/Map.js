@@ -45,15 +45,16 @@ const Map = React.createClass({
       minZoom: 2,
       maxZoom: 2,
       zoomControl: false,
+      attributionControl: false,
       layers: [
         L.tileLayer(
           'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
           {attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'})
-      ],
-      attributionControl: false,
+      ]
     });
     map.scrollWheelZoom.disable();
     map.touchZoom.disable();
+    map.dragging.disable();
     this.setState({map: this.map});
 
     map.on('click', this.onMapClick);
