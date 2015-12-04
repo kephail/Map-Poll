@@ -4,13 +4,15 @@ const Graph = React.createClass({
     return {
       data: [],
       loaded: false,
-      error: ''
+      error: '',
+      colours: [ "#3182bd", "#6baed6", "#9ecae1", "#c6dbef", "#e6550d", "#fd8d3c", "#fdae6b", "#fdd0a2", "#31a354", "#74c476", "#a1d99b", "#c7e9c0", "#756bb1", "#9e9ac8", "#bcbddc", "#dadaeb", "#636363", "#969696", "#bdbdbd", "#d9d9d9"]
     }
   },
 
   componentDidUpdate: function () {
-    this.makeBar();
-    this.makeGraph();
+    // this.makeBar();
+    // this.makeGraph();
+    this.makeTopCountries();
   },
 
   componentWillMount: function () {
@@ -32,20 +34,25 @@ const Graph = React.createClass({
           if (i === 0) {
             data.push({
               countryName: answer.selectedCountry,
-              count: 1
+              value: 1,
+              label: answer.selectedCountry,
+              color: that.state.colours[data.length],
+              highlight: that.LightenDarkenColor(that.state.colours[data.length], 20)
             });
           }
-
           for (var j = 0; j < data.length; j++) {
 
             if (data[j].countryName === answer.selectedCountry && i != 0) {
-              data[j].count++;
+              data[j].value++;
               break;
             }
             else if (j === data.length - 1 && data[j].countryName != answer.selectedCountry) {
               data.push({
                 countryName: answer.selectedCountry,
-                count: 1
+                value: 1,
+                label: answer.selectedCountry,
+                color: that.state.colours[data.length],
+                highlight: that.LightenDarkenColor(that.state.colours[data.length], 20)
               });
               break;
             }
@@ -97,7 +104,7 @@ const Graph = React.createClass({
       .outerRadius(outerRadius-40);
 
     var pie = d3.layout.pie() //this will create arc data for us given a list of values
-      .value(function(d) { return d.count; }) // Binding each value to the pie
+      .value(function(d) { return d.value; }) // Binding each value to the pie
       .sort( function(d) { return null; } );
 
     // Select all <g> elements with class slice (there aren't any yet)
@@ -132,7 +139,7 @@ const Graph = React.createClass({
       .style("font", "bold 12px Arial")
       .text(function(d, i) { return data[i].countryName; }); //get the label from our original data array
 
-    // Add a count value to the larger arcs, translated to the arc centroid and rotated.
+    // Add a value value to the larger arcs, translated to the arc centroid and rotated.
     arcs.filter(function(d) { return d.endAngle - d.startAngle > .2; }).append("svg:text")
       .attr("dy", ".35em")
       .attr("text-anchor", "middle")
@@ -145,7 +152,7 @@ const Graph = React.createClass({
       })
       .style("fill", "White")
       .style("font", "bold 12px Arial")
-      .text(function(d) { return d.data.count; });
+      .text(function(d) { return d.data.value; });
 
     // Computes the angle of an arc, converting from radians to degrees.
     function angle(d) {
@@ -160,8 +167,8 @@ const Graph = React.createClass({
     let dataTotal = 0;
     const minCount = 3
     for (let i in data) {
-      if (data[i].count >= minCount) {
-        dataTotal += data[i].count;
+      if (data[i].value >= minCount) {
+        dataTotal += data[i].value;
       }
     }
 
@@ -171,12 +178,49 @@ const Graph = React.createClass({
 
     var vis = d3.select(".graph")
       .selectAll("div")
-        .data(data.filter(function(d) { return d.count >= minCount  }))
+        .data(data.filter(function(d) { return d.value >= minCount  }))
       .enter().append("div")
-        .style("width", function(d) { return (d.count / dataTotal) * 100 + "%"; })
+        .style("width", function(d) { return (d.value / dataTotal) * 100 + "%"; })
         .style("height", "50px")
         .style("background-color", function(d, i) { return color(i); })
-        .text(function(d) { return d.countryName + ": " + d.count });
+        .text(function(d) { return d.countryName + ": " + d.value });
+  },
+
+  makeTopCountries: function () {
+    const { data } = this.state;
+    const options = {};
+    let ctx = document.getElementById(this.props.type).getContext("2d");
+    var myPieChart = new Chart(ctx).Doughnut(data,options);
+  },
+
+  LightenDarkenColor: function (col, amt) {
+
+    var usePound = false;
+
+    if (col[0] == "#") {
+        col = col.slice(1);
+        usePound = true;
+    }
+
+    var num = parseInt(col,16);
+
+    var r = (num >> 16) + amt;
+
+    if (r > 255) r = 255;
+    else if  (r < 0) r = 0;
+
+    var b = ((num >> 8) & 0x00FF) + amt;
+
+    if (b > 255) b = 255;
+    else if  (b < 0) b = 0;
+
+    var g = (num & 0x0000FF) + amt;
+
+    if (g > 255) g = 255;
+    else if (g < 0) g = 0;
+
+    return (usePound?"#":"") + (g | (b << 8) | (r << 16)).toString(16);
+
   },
 
   render: function() {
@@ -184,14 +228,17 @@ const Graph = React.createClass({
     const { error, loading, loaded } = this.state;
 
     return (
-    <div>
+    <div className='graph'>
 
       {error && (
         <p className="error-message">{error}</p>
       )}
 
       {loaded ? (
-        <div className='graph'></div>
+        <div>
+          <h2>{this.props.title}</h2>
+          <canvas id={this.props.type} width="300" height="300"></canvas>
+        </div>
       ) : (
         <p>Loading...</p>
       )}
