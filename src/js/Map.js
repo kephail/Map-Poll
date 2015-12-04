@@ -48,8 +48,13 @@ const Map = React.createClass({
       attributionControl: false,
       layers: [
         L.tileLayer(
-          'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          {attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'})
+          'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}',
+          {
+            attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+            accessToken: "pk.eyJ1IjoiYmVuaGFycmlzIiwiYSI6IkRFY0xmeEUifQ.b0F3crnk3HJF_5YqtOXfsQ",
+            id: "benharris.f5cdc064"
+          }
+        )
       ]
     });
     map.scrollWheelZoom.disable();
